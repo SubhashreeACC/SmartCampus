@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SmartCampus - Attendance Intelligence</title>
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+	<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+	<link rel="stylesheet" href="/css/style.css">
+
+	<style>
+		:root {
+			--bg: #faf7f2;
+			--surface: #ffffff;
+			--text-primary: #1e1e1e;
+			--text-secondary: #5a5a5a;
+			--lime: #c8f135;
+			--lime-dim: rgba(200, 241, 53, 0.1);
+			--border: rgba(0, 0, 0, 0.06);
+			--shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.06);
+		}
+
+		body {
+			background-color: var(--bg);
+			font-family: 'Sora', sans-serif;
+			color: var(--text-primary);
+		}
+
+		.main {
+			padding: 2rem;
+		}
+
+		.step-card {
+			background: var(--surface);
+			border-radius: 24px;
+			border: 1px solid var(--border);
+			padding: 40px;
+			max-width: 800px;
+			margin: 20px auto;
+			box-shadow: var(--shadow);
+			animation: fadeInUp 0.5s ease both;
+		}
+
+		.step-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			background: var(--lime-dim);
+			color: #1a1d2e;
+			font-size: 11px;
+			font-weight: 700;
+			padding: 6px 14px;
+			border-radius: 40px;
+			margin-bottom: 20px;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			border: 1px solid rgba(200, 241, 53, 0.3);
+		}
+
+		.step-title {
+			font-size: 32px;
+			font-weight: 800;
+			color: var(--text-primary);
+			margin-bottom: 8px;
+			letter-spacing: -0.02em;
+		}
+
+		.step-sub {
+			font-size: 15px;
+			color: var(--text-secondary);
+			margin-bottom: 32px;
+			line-height: 1.6;
+		}
+
+		.form-label-custom {
+			font-size: 12px;
+			font-weight: 700;
+			color: var(--text-secondary);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 10px;
+			display: block;
+		}
+
+		.class-select {
+			width: 100%;
+			padding: 14px 18px;
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			font-family: inherit;
+			font-size: 15px;
+			color: var(--text-primary);
+			background: #fdfcf9;
+			appearance: none;
+			cursor: pointer;
+			outline: none;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.class-select:focus {
+			border-color: var(--lime);
+			box-shadow: 0 0 0 4px var(--lime-dim);
+			background: #fff;
+		}
+
+		.btn-lime {
+			background: var(--lime);
+			color: #1a1d2e;
+			border: none;
+			border-radius: 16px;
+			padding: 16px 32px;
+			font-weight: 700;
+			font-size: 15px;
+			cursor: pointer;
+			transition: all 0.3s;
+			width: 100%;
+			margin-top: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+		}
+
+		.btn-lime:hover {
+			background: #daf55c;
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px -6px rgba(200, 241, 53, 0.4);
+		}
+
+		.btn-outline-custom {
+			background: transparent;
+			color: var(--text-primary);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			padding: 12px 24px;
+			font-weight: 600;
+			font-size: 14px;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.btn-outline-custom:hover {
+			background: var(--bg);
+			border-color: var(--text-primary);
+		}
+
+		/* QR Session Styling */
+		.active-session-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 30px;
+		}
+
+		.timer-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin: 30px 0;
+		}
+
+		.timer-circle-wrap {
+			position: relative;
+			width: 160px;
+			height: 160px;
+		}
+
+		.timer-svg {
+			transform: rotate(-90deg);
+		}
+
+		.timer-svg circle {
+			fill: none;
+			stroke-width: 10;
+		}
+
+		.timer-bg {
+			stroke: #f0ede7;
+		}
+
+		.timer-fg {
+			stroke: var(--lime);
+			stroke-linecap: round;
+			transition: stroke-dashoffset 0.5s linear;
+		}
+
+		.timer-content {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			text-align: center;
+		}
+
+		.timer-val {
+			font-size: 32px;
+			font-weight: 800;
+			color: var(--text-primary);
+			font-family: 'DM Mono', monospace;
+		}
+
+		.timer-sub {
+			font-size: 10px;
+			color: var(--text-secondary);
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			font-weight: 600;
+		}
+
+		.qr-box {
+			background: white;
+			padding: 24px;
+			border-radius: 24px;
+			border: 1px solid var(--border);
+			display: inline-block;
+			box-shadow: var(--shadow);
+		}
+
+		#qrcode img {
+			border-radius: 8px;
+		}
+
+		/* Attendance Table */
+		.table-wrap {
+			margin-top: 24px;
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			overflow: hidden;
+			background: #fff;
+		}
+
+		.table-custom {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		.table-custom th {
+			background: #fdfcf9;
+			padding: 14px 20px;
+			font-size: 11px;
+			font-weight: 700;
+			text-transform: uppercase;
+			color: var(--text-secondary);
+			letter-spacing: 0.05em;
+			border-bottom: 1px solid var(--border);
+		}
+
+		.table-custom td {
+			padding: 14px 20px;
+			font-size: 14px;
+			color: var(--text-primary);
+			border-bottom: 1px solid var(--border);
+		}
+
+		.badge-method {
+			padding: 4px 10px;
+			border-radius: 30px;
+			font-size: 10px;
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+
+		.method-qr {
+			background: var(--lime-dim);
+			color: #2d7a4f;
+		}
+
+		.method-manual {
+			background: #f0ede7;
+			color: #5a5a5a;
+		}
+
+		/* Summary Stats */
+		.summary-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 16px;
+			margin: 32px 0;
+		}
+
+		.summary-item {
+			background: #fdfcf9;
+			padding: 24px;
+			border-radius: 20px;
+			text-align: center;
+			border: 1px solid var(--border);
+		}
+
+		.summary-val {
+			font-size: 36px;
+			font-weight: 800;
+			color: var(--text-primary);
+			line-height: 1;
+		}
+
+		.summary-label {
+			font-size: 11px;
+			font-weight: 700;
+			color: var(--text-secondary);
+			margin-top: 8px;
+			text-transform: uppercase;
+		}
+
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		.spinner-custom {
+			width: 18px;
+			height: 18px;
+			border: 2px solid rgba(0, 0, 0, 0.1);
+			border-top-color: #000;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+		}
+
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
+		}
+
+		/* Responsive Sidebar Fix */
+		@media (max-width: 768px) {
+			.main {
+				margin-left: 0;
+				padding: 1rem;
+			}
+
+			.step-card {
+				padding: 24px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<div th:replace="fragments/sidebar :: sidebar"></div>
+
+	<main class="main">
+		<div th:replace="fragments/topbar :: topbar"></div>
+
+		<div class="content">
+
+			<!-- ─── STEP 1: Setup ─── -->
+			<div id="step-setup" class="step-card">
+				<span class="step-badge"><i class="fas fa-cog"></i> Step 1: Configuration</span>
+				<div class="step-title">Attendance Hub</div>
+				<div class="step-sub">Initialize an intelligent attendance session. Students scan your dynamic QR code
+					to mark their presence automatically.</div>
+
+				<div class="row g-4">
+					<div class="col-md-12">
+						<label class="form-label-custom">Target Class</label>
+						<select class="class-select" id="classSelect">
+							<option value="">-- Select Active Course --</option>
+							<option th:each="cls : ${myClasses}" th:value="${cls.subjectCode}"
+								th:text="${cls.subjectCode + ' - ' + cls.subjectName + ' (' + cls.deptCode + ')'}">
+								CSE301 - Data Structures
+							</option>
+						</select>
+					</div>
+
+					<div class="col-md-6">
+						<label class="form-label-custom">Current Session Time</label>
+						<input type="text" class="class-select" id="sessionTimeDisplay" readonly
+							style="background:#f0f0f0; cursor:not-allowed;" />
+					</div>
+
+					<div class="col-md-6">
+						<label class="form-label-custom">Session Window</label>
+						<select class="class-select" id="validitySelect">
+							<option value="20">20 Minutes (Standard)</option>
+							<option value="10">10 Minutes (Quick)</option>
+							<option value="45">45 Minutes (Full Lab)</option>
+							<option value="60">60 Minutes (Max)</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="mt-5">
+					<button class="btn-lime" id="startBtn" onclick="startSession()">
+						Initialize Smart Session <i class="fas fa-arrow-right"></i>
+					</button>
+				</div>
+				<div class="alert alert-danger mt-3" id="startError"
+					style="display:none; border-radius: 12px; font-size: 13px;"></div>
+			</div>
+
+			<!-- ─── STEP 2: Active QR ─── -->
+			<div id="step-qr" class="step-card" style="display:none;">
+				<div class="active-session-header">
+					<span class="step-badge" style="background: var(--lime); color: #000; border: none;">
+						<i class="fas fa-broadcast-tower"></i> Session Live
+					</span>
+					<div id="sessionCodePill" style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">
+						SESSION #—
+					</div>
+				</div>
+
+				<div class="text-center">
+					<div class="step-title" id="qr-class-title">Course Name</div>
+					<div class="step-sub" id="qr-session-sub">Broadcasting attendance signal. Open SmartCampus app to
+						scan.</div>
+
+					<!-- Timer -->
+					<div class="timer-container">
+						<div class="timer-circle-wrap">
+							<svg class="timer-svg" width="160" height="160" viewBox="0 0 160 160">
+								<circle class="timer-bg" cx="80" cy="80" r="70" />
+								<circle class="timer-fg" id="timerCircle" cx="80" cy="80" r="70"
+									stroke-dasharray="439.8" stroke-dashoffset="0" />
+							</svg>
+							<div class="timer-content">
+								<div class="timer-val" id="timerDisplay">20:00</div>
+								<div class="timer-sub">Time Remaining</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- QR Code -->
+					<div class="qr-box mb-4">
+						<div id="qrcode"></div>
+					</div>
+
+					<div class="d-flex justify-content-center gap-3">
+						<span class="step-badge" id="scanCountPill"
+							style="background: #fff; border: 1px solid var(--border);">
+							<i class="fas fa-user-check"></i> 0 Scanned
+						</span>
+					</div>
+				</div>
+
+				<hr style="margin: 40px 0; border-color: var(--border);">
+
+				<!-- Tabs for Log/Manual -->
+				<ul class="nav nav-pills mb-4 justify-content-center" id="pills-tab" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-log" type="button"
+							style="border-radius: 12px; font-weight: 600;">
+							<i class="fas fa-list-ul"></i> Attendance Log
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-manual" type="button"
+							style="border-radius: 12px; font-weight: 600;">
+							<i class="fas fa-keyboard"></i> Manual Entry
+						</button>
+					</li>
+				</ul>
+
+				<div class="tab-content" id="pills-tabContent">
+					<!-- Log Tab -->
+					<div class="tab-pane fade show active" id="tab-log">
+						<div class="table-wrap">
+							<table class="table-custom">
+								<thead>
+									<tr>
+										<th>Reg No.</th>
+										<th>Student Name</th>
+										<th>Timestamp</th>
+										<th>Mode</th>
+									</tr>
+								</thead>
+								<tbody id="attendanceBody">
+									<tr>
+										<td colspan="4" class="text-center py-5 text-muted">Awaiting first scan...</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<!-- Manual Tab -->
+					<div class="tab-pane fade" id="tab-manual">
+						<div
+							style="background: #fdfcf9; border: 1px solid var(--border); border-radius: 20px; padding: 24px;">
+							<label class="form-label-custom">Register Presence Manually</label>
+							<div class="row g-3">
+								<div class="col-md-4">
+									<input id="manReg" type="text" placeholder="Reg No (e.g. 21CS01)"
+										class="class-select" />
+								</div>
+								<div class="col-md-6">
+									<input id="manName" type="text" placeholder="Student Full Name"
+										class="class-select" />
+								</div>
+								<div class="col-md-2">
+									<button class="btn-lime" onclick="markManual()"
+										style="margin-top: 0; padding: 14px;">
+										<i class="fas fa-plus"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-5 d-flex justify-content-between align-items: center;">
+					<button class="btn-outline-custom" onclick="endSession()">
+						<i class="fas fa-stop-circle"></i> Terminate & Export
+					</button>
+					<div style="font-size: 11px; color: var(--text-secondary); font-style: italic;">
+						<i class="fas fa-shield-halved"></i> QR token cycles every 120s
+					</div>
+				</div>
+			</div>
+
+			<!-- ─── STEP 3: Summary ─── -->
+			<div id="step-summary" class="step-card" style="display:none;">
+				<span class="step-badge" style="background: var(--lime); color: #000; border: none;">
+					<i class="fas fa-check-double"></i> Insights Ready
+				</span>
+				<div class="step-title">Session Overview</div>
+				<div class="step-sub" id="sumSubtitle">Your session has been successfully archived in the SmartCampus
+					database.</div>
+
+				<div class="summary-grid">
+					<div class="summary-item">
+						<div class="summary-val" id="sumTotal">0</div>
+						<div class="summary-label">Total Present</div>
+					</div>
+					<div class="summary-item">
+						<div class="summary-val" id="sumSelf" style="color: #2d7a4f;">0</div>
+						<div class="summary-label">App Scans</div>
+					</div>
+					<div class="summary-item">
+						<div class="summary-val" id="sumManual" style="color: var(--text-secondary);">0</div>
+						<div class="summary-label">Manual</div>
+					</div>
+				</div>
+
+				<div class="table-wrap mb-4">
+					<table class="table-custom">
+						<thead>
+							<tr>
+								<th>Reg No.</th>
+								<th>Name</th>
+								<th>Final Status</th>
+							</tr>
+						</thead>
+						<tbody id="summaryBody"></tbody>
+					</table>
+				</div>
+
+				<div class="d-flex gap-3">
+					<button class="btn-lime" style="width: auto; flex: 1;" onclick="exportCSV()">
+						<i class="fas fa-file-csv"></i> Download CSV Report
+					</button>
+					<button class="btn-outline-custom" onclick="resetAll()">
+						Start New Session
+					</button>
+				</div>
+			</div>
+
+		</div>
+	</main>
+
+	<script>
+		// Config
+		const BASE_URL = window.location.origin + '/attendance';
+
+		// State
+		let attendanceLog = [];
+		let timerInterval = null;
+		let qrRefreshInterval = null;
+		let totalSeconds = 0;
+		let secondsLeft = 0;
+		let sessionCode = '';
+		let sessionClass = '';
+
+		const CIRCUMFERENCE = 2 * Math.PI * 70; // r=70
+
+		function now() {
+			return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+		}
+
+		// Initial setup
+		window.addEventListener('load', () => {
+			function updateDisplayTime() {
+				const now = new Date();
+				const display = document.getElementById('sessionTimeDisplay');
+				if (display) {
+					display.value = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' +
+						now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+				}
+			}
+			updateDisplayTime();
+			setInterval(updateDisplayTime, 1000);
+		});
+
+		async function startSession() {
+			const cls = document.getElementById('classSelect').value;
+			if (!cls) { alert('Please select a course to continue.'); return; }
+
+			const btn = document.getElementById('startBtn');
+			btn.disabled = true;
+			btn.innerHTML = '<div class="spinner-custom"></div> Initializing...';
+
+			const validity = parseInt(document.getElementById('validitySelect').value);
+			const className = document.getElementById('classSelect').selectedOptions[0].text;
+
+			try {
+				const res = await fetch(`${BASE_URL}/session/start`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ classCode: cls, className, validity })
+				});
+				const data = await res.json();
+
+				if (!res.ok) throw new Error(data.message || 'Gateway Timeout');
+
+				sessionCode = data.sessionId;
+				sessionClass = cls;
+				totalSeconds = validity * 60;
+				secondsLeft = totalSeconds;
+				attendanceLog = [];
+
+				document.getElementById('qr-class-title').textContent = className.split('-')[1] || className;
+				document.getElementById('sessionCodePill').textContent = 'SESSION #' + sessionCode;
+
+				document.getElementById('step-setup').style.display = 'none';
+				document.getElementById('step-qr').style.display = 'block';
+
+				generateQR();
+				startTimer();
+
+				// Live polling for attendance
+				setInterval(pollAttendance, 3000);
+				qrRefreshInterval = setInterval(generateQR, 120000);
+
+			} catch (err) {
+				const errEl = document.getElementById('startError');
+				errEl.textContent = 'Connection Error: ' + err.message;
+				errEl.style.display = 'block';
+			} finally {
+				btn.disabled = false;
+				btn.innerHTML = 'Initialize Smart Session <i class="fas fa-arrow-right"></i>';
+			}
+		}
+
+		function generateQR() {
+			const el = document.getElementById('qrcode');
+			el.innerHTML = '';
+			const qrData = `http://192.168.29.53:8080/attendance/mark?sessionId=${sessionCode}&t=${Date.now()}`;
+			new QRCode(el, {
+				text: qrData,
+				width: 240,
+				height: 240,
+				colorDark: '#1a1d2e',
+				colorLight: '#ffffff',
+				correctLevel: QRCode.CorrectLevel.H
+			});
+		}
+
+		function startTimer() {
+			updateTimerUI();
+			timerInterval = setInterval(() => {
+				secondsLeft--;
+				if (secondsLeft <= 0) {
+					clearInterval(timerInterval);
+					clearInterval(qrRefreshInterval);
+					secondsLeft = 0;
+					updateTimerUI();
+				} else { updateTimerUI(); }
+			}, 1000);
+		}
+
+		function updateTimerUI() {
+			const m = Math.floor(secondsLeft / 60);
+			const s = secondsLeft % 60;
+			document.getElementById('timerDisplay').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+			const pct = secondsLeft / totalSeconds;
+			const offset = CIRCUMFERENCE * (1 - pct);
+			document.getElementById('timerCircle').style.strokeDashoffset = offset;
+		}
+
+		async function pollAttendance() {
+			if (!sessionCode) return;
+			try {
+				const res = await fetch(`${BASE_URL}/session/${sessionCode}`);
+				const data = await res.json();
+				if (Array.isArray(data) && data.length !== attendanceLog.length) {
+					attendanceLog = data;
+					renderLog();
+					document.getElementById('scanCountPill').innerHTML = `<i class="fas fa-user-check"></i> ${attendanceLog.length} Scanned`;
+				}
+			} catch (e) { }
+		}
+
+		function renderLog() {
+			const tbody = document.getElementById('attendanceBody');
+			if (attendanceLog.length === 0) {
+				tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted">Awaiting first scan...</td></tr>';
+				return;
+			}
+			tbody.innerHTML = attendanceLog.map(a => `
+				<tr>
+					<td><span style="font-family:'DM Mono'; font-weight:600;">${a.regNo}</span></td>
+					<td><span style="font-weight:600;">${a.name}</span></td>
+					<td style="color:var(--text-secondary); font-size:12px;">${a.timestamp || now()}</td>
+					<td><span class="badge-method ${a.method === 'MANUAL' ? 'method-manual' : 'method-qr'}">${a.method || 'QR'}</span></td>
+				</tr>
+			`).join('');
+		}
+
+		async function markManual() {
+			const reg = document.getElementById('manReg').value;
+			const name = document.getElementById('manName').value;
+			if (!reg || !name) return;
+
+			try {
+				const res = await fetch(`${BASE_URL}/mark`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						regNo: reg,
+						name,
+						method: 'MANUAL',
+						sessionId: sessionCode
+					})
+				});
+				const data = await res.json();
+				if (data.success) {
+					document.getElementById('manReg').value = '';
+					document.getElementById('manName').value = '';
+					pollAttendance();
+				}
+			} catch (e) { }
+		}
+
+		async function endSession() {
+			if (!confirm('Are you sure you want to terminate this session?')) return;
+			clearInterval(timerInterval);
+			clearInterval(qrRefreshInterval);
+
+			try {
+				await fetch(`${BASE_URL}/session/end/${sessionCode}`, { method: 'POST' });
+				document.getElementById('step-qr').style.display = 'none';
+				document.getElementById('step-summary').style.display = 'block';
+
+				const selfCount = attendanceLog.filter(a => a.method !== 'MANUAL').length;
+				const manualCount = attendanceLog.filter(a => a.method === 'MANUAL').length;
+
+				document.getElementById('sumTotal').textContent = attendanceLog.length;
+				document.getElementById('sumSelf').textContent = selfCount;
+				document.getElementById('sumManual').textContent = manualCount;
+
+				document.getElementById('summaryBody').innerHTML = attendanceLog.map(a => `
+					<tr>
+						<td>${a.regNo}</td>
+						<td>${a.name}</td>
+						<td><span class="step-badge" style="margin:0; font-size:9px; background:#eaf3de; color:#2d7a4f;">Present</span></td>
+					</tr>
+				`).join('');
+			} catch (e) { }
+		}
+
+		function resetAll() {
+			location.reload();
+		}
+
+		function exportCSV() {
+			const cls = document.getElementById('classSelect').selectedOptions[0].text;
+			let csv = 'Registration No,Student Name,Time,Method\n';
+			attendanceLog.forEach(a => {
+				csv += `${a.regNo},${a.name},${a.timestamp || now()},${a.method || 'QR'}\n`;
+			});
+			const blob = new Blob([csv], { type: 'text/csv' });
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.setAttribute('hidden', '');
+			a.setAttribute('href', url);
+			a.setAttribute('download', `Attendance_${sessionCode}_${cls.replace(/[^a-z0-9]/gi, '_')}.csv`);
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		}
+	</script>
+</body>
+
+</html>

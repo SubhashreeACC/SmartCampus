@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCampus — Register Faculty</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
+    <style>
+        /* Override main padding for full-fit layout */
+        .main { padding: 0 !important; display: flex; flex-direction: column; }
+
+        /* ── Full-height page layout ── */
+        .reg-page {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Topbar sits at top, not sticky here since we control layout */
+        .reg-topbar-wrap {
+            flex-shrink: 0;
+            padding: 0 32px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ── Content area splits into left panel + right form ── */
+        .reg-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            overflow: hidden;
+        }
+
+        /* ── Left: Info Panel ── */
+        .reg-panel {
+            background: linear-gradient(160deg, #1a5c38 0%, #0f3320 100%);
+            padding: 32px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            overflow: hidden;
+        }
+        .panel-logo { display: flex; align-items: center; gap: 10px; }
+        .panel-logo i { color: var(--primary); font-size: 22px; }
+        .panel-logo span { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+        .panel-logo span em { color: var(--primary); font-style: normal; }
+
+        .panel-title { color: #fff; }
+        .panel-title h2 { font-size: 24px; font-weight: 800; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 8px; }
+        .panel-title p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+        .panel-steps { display: flex; flex-direction: column; gap: 16px; }
+        .step-item { display: flex; align-items: center; gap: 12px; }
+        .step-num {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--primary); color: #1a2e24;
+            font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-text { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; }
+
+        .panel-footer { margin-top: auto; }
+        .avatar-preview {
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            object-fit: cover;
+            display: none;
+            margin-bottom: 10px;
+        }
+        .avatar-placeholder {
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            border: 3px dashed rgba(200,241,53,0.5);
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(255,255,255,0.3); font-size: 28px;
+            margin-bottom: 12px; cursor: pointer;
+        }
+        .avatar-placeholder:hover { border-color: var(--primary); color: var(--primary); }
+        .upload-hint { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+        /* ── Right: Form ── */
+        .reg-form-area {
+            background: var(--card-bg);
+            padding: 28px 36px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 24px;
+            flex: 1;
+        }
+        .span-2 { grid-column: span 2; }
+
+        .field { display: flex; flex-direction: column; gap: 5px; }
+        .field label {
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.07em;
+            color: var(--text-light);
+        }
+        .input-wrap { position: relative; }
+        .input-wrap i {
+            position: absolute; left: 12px;
+            top: 50%; transform: translateY(-50%);
+            color: var(--text-light); font-size: 12px;
+            pointer-events: none;
+        }
+        .field-ctrl {
+            width: 100%;
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px 9px 34px;
+            font-size: 13px;
+            font-family: 'Sora', sans-serif;
+            color: var(--text-dark);
+            outline: none;
+            transition: 0.2s;
+        }
+        .field-ctrl.no-icon { padding-left: 12px; }
+        .field-ctrl:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(200,241,53,0.15);
+        }
+        textarea.field-ctrl { resize: none; padding-top: 9px; line-height: 1.4; }
+
+        /* Gender toggles */
+        .gender-row { display: flex; gap: 8px; }
+        .g-opt input { display: none; }
+        .g-opt label {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px 10px;
+            background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
+            font-size: 12px; font-weight: 600; color: var(--text-mid);
+            cursor: pointer; transition: 0.2s; white-space: nowrap;
+        }
+        .g-opt input:checked + label {
+            background: var(--primary-pale); border-color: var(--primary); color: var(--text-dark);
+        }
+
+        /* Submit row */
+        .submit-row {
+            display: flex; justify-content: flex-end; gap: 12px;
+            padding-top: 18px; margin-top: 4px;
+            border-top: 1px solid var(--border);
+        }
+        .btn-cancel {
+            padding: 10px 22px; border-radius: 10px;
+            background: transparent; border: 1.5px solid var(--border);
+            font-size: 13px; font-weight: 600; color: var(--text-mid);
+            cursor: pointer; transition: 0.2s; text-decoration: none;
+        }
+        .btn-cancel:hover { border-color: var(--text-mid); color: var(--text-dark); }
+        .btn-submit {
+            padding: 10px 28px; border-radius: 10px;
+            background: var(--primary); border: none;
+            font-size: 13px; font-weight: 700; color: #1a2e24;
+            cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-submit:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: var(--shadow-hover); }
+
+        .section-divider {
+            grid-column: span 2;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: var(--primary); margin-top: 4px;
+        }
+        .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/sidebar :: sidebar"></div>
+
+<main class="main">
+<div class="reg-page">
+
+    <!-- Topbar -->
+    <div class="reg-topbar-wrap">
+        <div th:replace="fragments/topbar :: topbar"></div>
+    </div>
+
+    <!-- Body: Panel + Form -->
+    <div class="reg-body">
+
+        <!-- Left Panel -->
+        <div class="reg-panel">
+            <div class="panel-logo">
+                <i class="fas fa-brain"></i>
+                <span>Smart<em>Campus</em></span>
+            </div>
+
+            <div class="panel-title">
+                <h2>Register<br>Faculty<br><span style="color:var(--primary)">Member</span></h2>
+                <p>Add a new educator to the SmartCampus ecosystem with full portal access.</p>
+            </div>
+
+            <div class="panel-steps">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-text">Enter personal & contact details</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-text">Assign department & designation</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-text">Upload profile photo</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">4</div>
+                    <div class="step-text">Credentials auto-sent via email</div>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <img id="previewImg" class="avatar-preview" src="" alt="Preview">
+                <div class="avatar-placeholder" id="avatarPlaceholder" onclick="document.getElementById('profilePic').click()">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="upload-hint"><i class="fas fa-image" style="margin-right:4px"></i>Click avatar to upload photo</div>
+            </div>
+        </div>
+
+        <!-- Right Form Area -->
+        <div class="reg-form-area">
+            <form th:action="@{/admin/saveFaculty}" th:object="${faculty}" method="post" enctype="multipart/form-data">
+                <input type="file" name="profilePicture" id="profilePic" accept=".jpg,.jpeg,.png" style="display:none">
+
+                <div class="form-grid">
+
+                    <!-- Personal -->
+                    <div class="section-divider span-2"><i class="fas fa-user"></i> Personal</div>
+
+                    <div class="field">
+                        <label>Full Name</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-user"></i>
+                            <input type="text" th:field="*{fullName}" class="field-ctrl" placeholder="Dr. John Smith" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Email Address</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" th:field="*{email}" class="field-ctrl" placeholder="john@smartcampus.ai" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Phone Number</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-phone"></i>
+                            <input type="text" th:field="*{phone}" class="field-ctrl" placeholder="+91 00000 00000" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Gender</label>
+                        <div class="gender-row">
+                            <div class="g-opt">
+                                <input type="radio" th:field="*{gender}" value="Male" id="gM">
+                                <label for="gM"><i class="fas fa-mars"></i> Male</label>
+                            </div>
+                            <div class="g-opt">
+                                <input type="radio" th:field="*{gender}" value="Female" id="gF">
+                                <label for="gF"><i class="fas fa-venus"></i> Female</label>
+                            </div>
+                            <div class="g-opt">
+                                <input type="radio" th:field="*{gender}" value="Other" id="gO">
+                                <label for="gO">Other</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Academic -->
+                    <div class="section-divider span-2"><i class="fas fa-building-columns"></i> Academic</div>
+
+                    <div class="field">
+                        <label>Designation</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-briefcase"></i>
+                            <input type="text" th:field="*{designation}" class="field-ctrl" placeholder="Associate Professor" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Department</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-sitemap"></i>
+                            <select name="deptCode" class="field-ctrl" required>
+                                <option value="">-- Select Department --</option>
+                                <option th:each="dept : ${allDepartments}" th:value="${dept.deptCode}" th:text="${dept.deptName}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Joining Date</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-calendar"></i>
+                            <input type="text" th:field="*{joiningDate}" id="joiningDate" class="field-ctrl" placeholder="YYYY-MM-DD" autocomplete="off" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Address</label>
+                        <div class="input-wrap">
+                            <i class="fas fa-location-dot" style="top:14px;transform:none"></i>
+                            <textarea th:field="*{address}" class="field-ctrl" rows="2" placeholder="Full residential address"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Submit -->
+                <div class="submit-row">
+                    <a href="/admin/facultylist" class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-user-check"></i> Register Faculty
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+</main>
+
+<script>
+    $('#profilePic').change(function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                $('#previewImg').attr('src', e.target.result).show();
+                $('#avatarPlaceholder').hide();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    $(document).ready(function () {
+        $('#joiningDate').datepicker({ format: 'yyyy-mm-dd', autoclose: true, todayHighlight: true });
+    });
+</script>
+</body>
+</html>

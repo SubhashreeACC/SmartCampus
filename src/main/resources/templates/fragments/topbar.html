@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+	<div class="topbar" th:fragment="topbar">
+		<style>
+			.topbar {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 16px 0;
+				background: var(--bg);
+				margin-bottom: 28px;
+				border-bottom: 1px solid var(--border);
+				position: sticky;
+				top: 0;
+				z-index: 50;
+				/* Extend bg to cover padding area so content doesn't bleed under */
+				margin-left: -36px;
+				margin-right: -36px;
+				padding-left: 36px;
+				padding-right: 36px;
+			}
+
+			.topbar-left {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
+			.topbar-left .breadcrumb {
+				font-size: 10px;
+				font-weight: 600;
+				color: var(--text-light);
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+			}
+
+			.topbar-left h1 {
+				font-size: 28px;
+				font-weight: 800;
+				color: var(--text-dark);
+				margin: 0;
+				letter-spacing: -0.02em;
+			}
+
+			.topbar-right {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+			}
+
+			.search-pill {
+				background: var(--card-bg);
+				border: 1px solid var(--border);
+				padding: 10px 18px;
+				border-radius: 50px;
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				width: 320px;
+				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			}
+
+			.search-pill:focus-within {
+				border-color: var(--primary);
+				box-shadow: var(--shadow);
+			}
+
+			.search-pill input {
+				border: none;
+				background: transparent;
+				outline: none;
+				font-size: 13px;
+				width: 100%;
+				font-family: inherit;
+				color: var(--text-dark);
+			}
+
+			.icon-btn-custom {
+				width: 44px;
+				height: 44px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: var(--card-bg);
+				border: 1px solid var(--border);
+				color: var(--text-mid);
+				cursor: pointer;
+				transition: 0.2s;
+				position: relative;
+			}
+
+			.icon-btn-custom:hover {
+				background: var(--primary-pale);
+				border-color: var(--primary);
+				color: var(--text-dark);
+				transform: translateY(-2px);
+			}
+
+			.notification-dot {
+				position: absolute;
+				top: 12px;
+				right: 12px;
+				width: 8px;
+				height: 8px;
+				background: #ff4d4d;
+				border-radius: 50%;
+				border: 2px solid #fff;
+			}
+
+			.user-profile-pill {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 6px 16px 6px 6px;
+				background: var(--card-bg);
+				border: 1px solid var(--border);
+				border-radius: 50px;
+				cursor: pointer;
+				transition: 0.2s;
+			}
+
+			.user-profile-pill:hover {
+				border-color: var(--primary);
+				background: var(--primary-pale);
+			}
+
+			.avatar-circle {
+				width: 32px;
+				height: 32px;
+				border-radius: 50%;
+				background: var(--primary);
+				color: #fff;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 700;
+				font-size: 12px;
+			}
+
+			.user-info-mini {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.user-info-mini .name {
+				font-size: 12px;
+				font-weight: 700;
+				color: var(--text-dark);
+				line-height: 1.2;
+			}
+
+			.user-info-mini .role {
+				font-size: 10px;
+				color: var(--text-light);
+				font-weight: 600;
+			}
+
+			@media (max-width: 1024px) {
+				.search-pill { width: 200px; }
+			}
+			@media (max-width: 768px) {
+				.search-pill { display: none; }
+			}
+		</style>
+
+		<div class="topbar-left">
+			<div class="breadcrumb" th:text="${breadcrumb != null ? breadcrumb : 'SmartCampus / Portal'}">SmartCampus / Dashboard</div>
+			<h1 th:text="${pageTitle != null ? pageTitle : 'Dashboard'}">Dashboard</h1>
+		</div>
+
+		<div class="topbar-right">
+			<div class="search-pill">
+				<i class="fas fa-search" style="color: var(--text-light); font-size: 13px;"></i>
+				<input type="text" placeholder="Search resources..." />
+			</div>
+
+			<div class="icon-btn-custom">
+				<i class="far fa-bell"></i>
+				<div class="notification-dot"></div>
+			</div>
+
+			<div class="user-profile-pill">
+				<div class="avatar-circle" th:text="${#strings.substring(currentUser.name,0,1)}">U</div>
+				<div class="user-info-mini">
+					<span class="name" th:text="${currentUser.name}">Username</span>
+					<span class="student-id" th:if="${currentUser != null and #maps.containsKey(currentUser, 'studentId')}" th:text="${currentUser.studentId}">Student ID</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</body>
+
+</html>

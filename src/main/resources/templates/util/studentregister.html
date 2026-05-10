@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SmartCampus AI — Join the Future</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --surface: #12151c;
+            --primary: #c8f135;
+            --primary-glow: rgba(200, 241, 53, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #8a8f98;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Sora', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(200, 241, 53, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(200, 241, 53, 0.03) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            background: var(--surface);
+            border-radius: 40px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand-side {
+            background: linear-gradient(135deg, #1a1d26 0%, #0a0c10 100%);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid var(--border);
+        }
+
+        .brand-side .logo {
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-side .logo i { color: var(--primary); }
+
+        .brand-side h2 {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 30px 0 15px;
+            letter-spacing: -1px;
+        }
+
+        .features-list { margin-top: 20px; }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .feature-item i { color: var(--primary); }
+
+        .form-side {
+            padding: 40px 50px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar for form side */
+        .form-side::-webkit-scrollbar { width: 6px; }
+        .form-side::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 30px 0 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-header:first-of-type { margin-top: 0; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 25px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        .form-group { margin-bottom: 10px; }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap input, .input-wrap select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-wrap input:focus, .input-wrap select:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .btn-register {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 30px;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+
+        .form-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .form-footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
+
+        @media (max-width: 900px) {
+            .register-container { grid-template-columns: 1fr; border-radius: 20px; margin-top: 80px; }
+            .brand-side { display: none; }
+            .form-side { padding: 30px 20px; }
+        }
+
+        /* Nav Integration */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 12, 16, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .logo i { color: var(--primary); }
+
+        .nav-links { display: flex; gap: 40px; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { color: var(--primary); }
+
+        .btn-nav {
+            background: var(--primary);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 4px 20px var(--primary-glow); }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<nav>
+    <a href="/index" class="logo">
+        <i class="fas fa-brain"></i>
+        Smart<span>Campus</span>
+    </a>
+    <div class="nav-links">
+        <a href="/index">Home</a>
+        <a href="/studentregister">Register</a>
+    </div>
+    <div class="nav-buttons">
+        <a href="/login" class="btn-nav">Portal Access</a>
+    </div>
+</nav>
+
+<div class="register-container" style="margin-top: 80px;">
+    <div class="brand-side">
+        <div>
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                SmartCampus
+            </div>
+            <h2>Start Your<br><span style="color:var(--primary)">AI Journey</span></h2>
+            <p style="color:var(--text-muted); margin-top:10px; font-size: 13px;">Join the next generation of learners in a data-driven ecosystem.</p>
+        </div>
+        
+        <div class="features-list">
+            <div class="feature-item"><i class="fas fa-shield-check"></i> Secure Academic Records</div>
+            <div class="feature-item"><i class="fas fa-robot"></i> Personalized AI Insights</div>
+            <div class="feature-item"><i class="fas fa-chart-network"></i> Global Campus Network</div>
+        </div>
+        
+        <div style="font-size:11px; color:var(--text-muted)">Portal Version 2.4.0<br>© 2026 SmartCampus System</div>
+    </div>
+
+    <div class="form-side">
+        <form th:action="@{/savestudent}" th:object="${student}" method="post">
+            
+            <div class="section-header"><i class="fas fa-user"></i> Personal Identity</div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Full Name</label>
+                    <div class="input-wrap">
+                        <input type="text" th:field="*{fullname}" placeholder="e.g. Johnathan Smith" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-wrap">
+                        <input type="email" th:field="*{email}" placeholder="john@smartcampus.ai" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <div class="input-wrap">
+                        <input type="tel" th:field="*{mobile}" placeholder="+91 00000 00000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <div class="input-wrap">
+                        <input type="date" th:field="*{dob}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    <div class="input-wrap">
+                        <select th:field="*{gender}">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header"><i class="fas fa-graduation-cap"></i> Academic Records</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Department</label>
+                    <div class="input-wrap">
+                        <select th:field="*{department}">
+                            <option th:each="dept : ${allDepartments}" th:value="${dept.deptCode}" th:text="${dept.deptName}">Computer Science</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Year of Study</label>
+                    <div class="input-wrap">
+                        <select th:field="*{year}">
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Nationality</label>
+                    <div class="input-wrap">
+                        <input type="text" th:field="*{nationality}" placeholder="Enter your nationality" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header"><i class="fas fa-users"></i> Guardian & Address</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Guardian Name</label>
+                    <div class="input-wrap">
+                        <input type="text" th:field="*{guardianName}" placeholder="Parent/Guardian Name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Guardian Contact</label>
+                    <div class="input-wrap">
+                        <input type="tel" th:field="*{guardianPhone}" placeholder="Guardian Mobile No." required>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Permanent Address</label>
+                    <div class="input-wrap">
+                        <input type="text" th:field="*{address}" placeholder="Full residential address" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-register">Complete Registration</button>
+            
+            <div class="form-footer">
+                Already have an account? <a href="/login">Sign In Instead</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

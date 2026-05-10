@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SmartCampus - Dashboard</title>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+	<div th:replace="fragments/sidebar :: sidebar"></div>
+
+	<!-- ══ MAIN ══ -->
+	<main class="main">
+
+		<!-- Topbar -->
+		<div th:replace="fragments/topbar :: topbar"></div>
+
+		<!-- Stat Cards Row -->
+		<div class="grid-4">
+			<!-- Thymeleaf: th:each="stat : ${stats}" -->
+			<div class="stat-card">
+				<div class="stat-icon green">🎓</div>
+				<div class="stat-info">
+					<div class="value" th:text="${stats.studentCount}">0</div>
+					<div class="label">Total Students</div>
+					<div class="delta up">↑ Active Members</div>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon blue">👨‍🏫</div>
+				<div class="stat-info">
+					<div class="value" th:text="${stats.facultyCount}">0</div>
+					<div class="label">Total Faculty</div>
+					<div class="delta up">↑ Active Educators</div>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon orange">🏢</div>
+				<div class="stat-info">
+					<div class="value" th:text="${stats.deptCount}">0</div>
+					<div class="label">Departments</div>
+					<div class="delta">System Nodes</div>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon purple">📚</div>
+				<div class="stat-info">
+					<div class="value" th:text="${stats.subjectCount}">0</div>
+					<div class="label">Total Subjects</div>
+					<div class="delta up">Academic Courses</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Row 2: Today's Schedule + Attendance Chart + Weather -->
+		<div class="grid-3">
+
+			<!-- Today's Schedule -->
+			<div class="next-class-card" style="grid-column: span 1;">
+				<div class="card-header">
+					<span class="card-title">📅 Today's Classes</span>
+					<span class="card-link" th:text="${todayDate ?: 'Fri, 13 Mar 2026'}">Fri, 13 Mar 2026</span>
+				</div>
+				<!-- th:each="cls : ${todayClasses}" -->
+				<div class="class-row">
+					<div class="class-time">08:00</div>
+					<div class="class-color-dot" style="background:#2d7a4f;"></div>
+					<div class="class-info">
+						<div class="subject">Data Structures</div>
+						<div class="room">Room 204-B · Prof. Sharma</div>
+					</div>
+					<span class="class-badge badge-live">Live</span>
+				</div>
+				<div class="class-row">
+					<div class="class-time">10:30</div>
+					<div class="class-color-dot" style="background:#3a7bd5;"></div>
+					<div class="class-info">
+						<div class="subject">Operating Systems</div>
+						<div class="room">Room 301-A · Prof. Kumar</div>
+					</div>
+					<span class="class-badge badge-soon">Soon</span>
+				</div>
+				<div class="class-row">
+					<div class="class-time">13:00</div>
+					<div class="class-color-dot" style="background:#f4845f;"></div>
+					<div class="class-info">
+						<div class="subject">DBMS Lab</div>
+						<div class="room">Lab 02 · Prof. Reddy</div>
+					</div>
+					<span class="class-badge badge-later">Later</span>
+				</div>
+				<div class="class-row">
+					<div class="class-time">15:30</div>
+					<div class="class-color-dot" style="background:#7c5cbf;"></div>
+					<div class="class-info">
+						<div class="subject">Software Engineering</div>
+						<div class="room">Room 110 · Prof. Singh</div>
+					</div>
+					<span class="class-badge badge-later">Later</span>
+				</div>
+			</div>
+
+			<!-- Attendance Overview -->
+			<div class="card">
+				<div class="card-header">
+					<span class="card-title">📊 Attendance Overview</span>
+					<span class="card-link">View all</span>
+				</div>
+				<!-- th:each="sub : ${subjectAttendance}" -->
+				<div class="attendance-wrap">
+					<div th:each="sub : ${subjectAttendance}" style="margin-bottom:14px;">
+						<div class="attendance-labels">
+							<span>Data Structures</span><span>92%</span>
+						</div>
+						<div class="attendance-bar-bg">
+							<div class="attendance-bar-fill"
+								style="width:92%;background:linear-gradient(90deg,#2d7a4f,#4caf7d);"></div>
+						</div>
+					</div>
+					<div style="margin-bottom:14px;">
+						<div class="attendance-labels"><span>Operating Systems</span><span>78%</span></div>
+						<div class="attendance-bar-bg">
+							<div class="attendance-bar-fill"
+								style="width:78%;background:linear-gradient(90deg,#3a7bd5,#6fa8f5);"></div>
+						</div>
+					</div>
+					<div style="margin-bottom:14px;">
+						<div class="attendance-labels"><span>DBMS</span><span>85%</span></div>
+						<div class="attendance-bar-bg">
+							<div class="attendance-bar-fill"
+								style="width:85%;background:linear-gradient(90deg,#f4845f,#f9a98d);"></div>
+						</div>
+					</div>
+					<div style="margin-bottom:14px;">
+						<div class="attendance-labels"><span>Soft. Engineering</span><span>90%</span></div>
+						<div class="attendance-bar-bg">
+							<div class="attendance-bar-fill"
+								style="width:90%;background:linear-gradient(90deg,#7c5cbf,#a98de8);"></div>
+						</div>
+					</div>
+					<div>
+						<div class="attendance-labels"><span>Mathematics III</span><span>67%</span></div>
+						<div class="attendance-bar-bg">
+							<div class="attendance-bar-fill"
+								style="width:67%;background:linear-gradient(90deg,#e8c53a,#f5d878);"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Weather + Facility -->
+			<div style="display:flex; flex-direction:column; gap:20px;">
+				<div class="card" style="flex:0 0 auto;">
+					<div class="card-header">
+						<span class="card-title">🌤 Campus Weather</span>
+						<span class="card-link" th:text="${campusLocation ?: 'Bhubaneswar'}">Bhubaneswar</span>
+					</div>
+					<div class="weather-row">
+						<div class="weather-emoji">🌤</div>
+						<div>
+							<div class="weather-temp" th:text="${weather?.temp ?: '31°'}">31°</div>
+							<div class="weather-info">
+								<div class="condition" th:text="${weather?.condition ?: 'Partly Cloudy'}">Partly Cloudy
+								</div>
+								<div class="location">KIIT Campus, Odisha</div>
+							</div>
+						</div>
+					</div>
+					<div class="weather-details">
+						<div class="weather-detail">💧 68% Humidity</div>
+						<div class="weather-detail">💨 12 km/h Wind</div>
+						<div class="weather-detail">☀ UV Index 7</div>
+					</div>
+				</div>
+
+				<div class="card" style="flex: 1;">
+					<div class="card-header">
+						<span class="card-title">🏢 Facility Status</span>
+						<span class="card-link">All facilities</span>
+					</div>
+					<div class="facility-grid">
+						<!-- th:each="f : ${facilities}" -->
+						<div class="facility-item">
+							<div class="facility-dot dot-open"></div>
+							<div>
+								<div class="facility-name">Main Library</div>
+								<div class="facility-meta">42 seats free</div>
+							</div>
+							<div class="facility-status status-open">Open</div>
+						</div>
+						<div class="facility-item">
+							<div class="facility-dot dot-busy"></div>
+							<div>
+								<div class="facility-name">Gym</div>
+								<div class="facility-meta">87% occupied</div>
+							</div>
+							<div class="facility-status status-busy">Busy</div>
+						</div>
+						<div class="facility-item">
+							<div class="facility-dot dot-open"></div>
+							<div>
+								<div class="facility-name">Cafeteria</div>
+								<div class="facility-meta">Lunch 12–2 PM</div>
+							</div>
+							<div class="facility-status status-open">Open</div>
+						</div>
+						<div class="facility-item">
+							<div class="facility-dot dot-closed"></div>
+							<div>
+								<div class="facility-name">Auditorium</div>
+								<div class="facility-meta">Event at 5 PM</div>
+							</div>
+							<div class="facility-status status-closed">Closed</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Row 3: Leaderboard + Events + CTA -->
+		<div class="grid-2">
+
+			<!-- Top Students Leaderboard -->
+			<div class="card">
+				<div class="card-header">
+					<span class="card-title">🏆 Department Leaderboard</span>
+					<span class="card-link">View all</span>
+				</div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Student</th>
+							<th>Dept</th>
+							<th>GPA</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- th:each="s : ${leaderboard}" -->
+						<tr th:each="s : ${leaderboard}">
+							<td><span class="rank-num rank-1">1</span></td>
+							<td><span class="student-name">Priya Sharma</span></td>
+							<td><span class="dept-tag">CSE</span></td>
+							<td>
+								<div class="gpa-bar-wrap">
+									<div class="gpa-bar-bg">
+										<div class="gpa-bar-fill" style="width:96%;"></div>
+									</div>
+									<span class="gpa-val">9.6</span>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td><span class="rank-num rank-2">2</span></td>
+							<td><span class="student-name">Rahul Mehta</span></td>
+							<td><span class="dept-tag">ECE</span></td>
+							<td>
+								<div class="gpa-bar-wrap">
+									<div class="gpa-bar-bg">
+										<div class="gpa-bar-fill" style="width:94%;background:#3a7bd5;"></div>
+									</div>
+									<span class="gpa-val">9.4</span>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td><span class="rank-num rank-3">3</span></td>
+							<td><span class="student-name">Anita Verma</span></td>
+							<td><span class="dept-tag">MECH</span></td>
+							<td>
+								<div class="gpa-bar-wrap">
+									<div class="gpa-bar-bg">
+										<div class="gpa-bar-fill" style="width:92%;background:#7c5cbf;"></div>
+									</div>
+									<span class="gpa-val">9.2</span>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td><span class="rank-num">4</span></td>
+							<td><span class="student-name">Dev Krishnan</span></td>
+							<td><span class="dept-tag">CSE</span></td>
+							<td>
+								<div class="gpa-bar-wrap">
+									<div class="gpa-bar-bg">
+										<div class="gpa-bar-fill" style="width:89%;background:#f4845f;"></div>
+									</div>
+									<span class="gpa-val">8.9</span>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td><span class="rank-num">5</span></td>
+							<td><span class="student-name">Sneha Nair</span></td>
+							<td><span class="dept-tag">CIVIL</span></td>
+							<td>
+								<div class="gpa-bar-wrap">
+									<div class="gpa-bar-bg">
+										<div class="gpa-bar-fill" style="width:87%;background:#29b6b0;"></div>
+									</div>
+									<span class="gpa-val">8.7</span>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- Events + CTA stacked -->
+			<div style="display:flex; flex-direction:column; gap:20px;">
+				<div class="card">
+					<div class="card-header">
+						<span class="card-title">🎉 Upcoming Events</span>
+						<span class="card-link">View calendar</span>
+					</div>
+					<div class="event-list">
+						<!-- th:each="evt : ${upcomingEvents}" -->
+						<div class="event-item">
+							<div class="event-date-block">
+								<div class="day">15</div>
+								<div class="mon">MAR</div>
+							</div>
+							<div class="event-info">
+								<div class="title">Hackathon 2026</div>
+								<div class="meta">🕗 9:00 AM · Tech Hub Auditorium</div>
+							</div>
+							<span class="event-type evt-academic">Academic</span>
+						</div>
+						<div class="event-item">
+							<div class="event-date-block" style="background:#f4845f;">
+								<div class="day">18</div>
+								<div class="mon">MAR</div>
+							</div>
+							<div class="event-info">
+								<div class="title">Inter-College Cricket</div>
+								<div class="meta">🕗 8:00 AM · Sports Ground A</div>
+							</div>
+							<span class="event-type evt-sports">Sports</span>
+						</div>
+						<div class="event-item">
+							<div class="event-date-block" style="background:#7c5cbf;">
+								<div class="day">22</div>
+								<div class="mon">MAR</div>
+							</div>
+							<div class="event-info">
+								<div class="title">Annual Cultural Fest</div>
+								<div class="meta">🕗 4:00 PM · Open Air Theatre</div>
+							</div>
+							<span class="event-type evt-cultural">Cultural</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- CTA Banner -->
+				<div class="cta-banner">
+					<div class="cta-text">
+						<div class="eyebrow">Don't forget!</div>
+						<h3>Register for<br>Hackathon 2026</h3>
+						<button class="cta-btn" onclick="alert('Redirecting to registration...')">Register now
+							→</button>
+					</div>
+					<div class="cta-emoji">🚀</div>
+				</div>
+			</div>
+		</div>
+
+	</main>
+
+	<script>
+		// Animate bar fills on load
+		document.addEventListener('DOMContentLoaded', () => {
+			// Stagger attendance bars
+			const bars = document.querySelectorAll('.attendance-bar-fill');
+			bars.forEach((bar, i) => {
+				const w = bar.style.width;
+				bar.style.width = '0';
+				setTimeout(() => {bar.style.width = w;}, 200 + i * 120);
+			});
+
+			// Stagger GPA bars
+			const gpaBars = document.querySelectorAll('.gpa-bar-fill');
+			gpaBars.forEach((bar, i) => {
+				const w = bar.style.width;
+				bar.style.width = '0';
+				setTimeout(() => {bar.style.width = w;}, 400 + i * 100);
+			});
+		});
+	</script>
+</body>
+
+</html>

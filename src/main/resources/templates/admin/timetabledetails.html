@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCampus — Timetable Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .page-card { background: var(--card-bg); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); }
+        .page-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title-row h2 { font-size: 22px; font-weight: 700; color: var(--text-dark); }
+        .btn-lime { background: var(--primary); color: #1a2e24; font-weight: 700; border: none; padding: 10px 22px; border-radius: var(--radius-sm); cursor: pointer; transition: .2s; }
+        .btn-lime:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .filter-bar { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: var(--radius-sm); }
+        .filter-bar label { font-size: 12px; font-weight: 600; color: var(--text-mid); margin: 0 8px 0 0; }
+        .filter-select { border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; background: var(--card-bg); color: var(--text-dark); outline: none; }
+        .filter-select:focus { border-color: var(--primary); }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table thead th { background: var(--primary-pale); color: var(--text-dark); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 12px 16px; border-bottom: 2px solid var(--primary); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+        .data-table tbody tr:hover { background: var(--primary-pale); }
+        .data-table tbody td { padding: 12px 16px; font-size: 13.5px; color: var(--text-dark); vertical-align: middle; }
+        .day-badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+        .day-monday    { background:#e0f0ff; color:#2563eb; }
+        .day-tuesday   { background:#ece6f8; color:#7c3aed; }
+        .day-wednesday { background:#fef3c7; color:#d97706; }
+        .day-thursday  { background:#dcfce7; color:#16a34a; }
+        .day-friday    { background:#fde8df; color:#ea580c; }
+        .day-saturday  { background:var(--primary-pale); color:var(--primary); }
+        .subject-text { font-weight: 700; color: var(--text-dark); }
+        .time-chip { font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; color: var(--text-mid); font-weight: 600; }
+        .room-tag { font-size: 11px; font-weight: 700; background: #dbeeff; color: var(--accent-blue); padding: 3px 10px; border-radius: 6px; }
+        .btn-del { background: #fde8df; color: var(--accent-orange); border: none; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; transition: .2s; }
+        .btn-del:hover { background: var(--accent-orange); color: #fff; }
+        .modal-content { border-radius: var(--radius); border: 1px solid var(--border); }
+        .modal-header { background: var(--primary-pale); border-bottom: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; }
+        .modal-title { font-weight: 700; color: var(--text-dark); }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--text-mid); margin-bottom: 5px; display: block; }
+        .form-control { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; width: 100%; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(200,241,53,.2); outline: none; }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/sidebar :: sidebar"></div>
+<main class="main">
+    <div th:replace="fragments/topbar :: topbar"></div>
+
+    <div class="page-card">
+        <div class="page-title-row">
+            <h2><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:10px"></i>Timetable Management</h2>
+            <button class="btn-lime" data-bs-toggle="modal" data-bs-target="#addTimetableModal">
+                <i class="fas fa-plus"></i> Add Entry
+            </button>
+        </div>
+
+        <div class="filter-bar">
+            <label><i class="fas fa-filter"></i> Filter by Department:</label>
+            <select id="deptFilter" class="filter-select">
+                <option value="">All Departments</option>
+            </select>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table" id="timeTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Day</th>
+                        <th>Department</th>
+                        <th>Subject</th>
+                        <th>Faculty</th>
+                        <th>Time</th>
+                        <th>Room</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="tt, stat : ${timeTableList}">
+                        <td style="color:var(--text-light);font-weight:600" th:text="${stat.count}"></td>
+                        <td>
+                            <span class="day-badge"
+                                th:classappend="${'day-'+#strings.toLowerCase(tt.day)}"
+                                th:text="${tt.day}">Monday</span>
+                        </td>
+                        <td th:text="${tt.department}"></td>
+                        <td class="subject-text" th:text="${tt.subject}"></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <div style="width:28px;height:28px;border-radius:50%;background:var(--primary-pale);color:var(--primary);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;"
+                                    th:text="${tt.faculty != null ? #strings.substring(tt.faculty, 0, 2).toUpperCase() : '?'}">DR</div>
+                                <span th:text="${tt.faculty}"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="time-chip" th:text="${tt.startTime + ' — ' + tt.endTime}"></span>
+                        </td>
+                        <td><span class="room-tag" th:text="${tt.room}"></span></td>
+                        <td>
+                            <a class="btn-del" th:href="@{/admin/deleteTime/{id}(id=${tt.id})}"
+                               onclick="return confirm('Delete this timetable entry?')">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Timetable Modal -->
+    <div class="modal fade" id="addTimetableModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calendar-plus me-2"></i>Add Timetable Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/saveTimeTable}" method="post">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Day</label>
+                                <select name="day" class="form-control" required>
+                                    <option>Monday</option>
+                                    <option>Tuesday</option>
+                                    <option>Wednesday</option>
+                                    <option>Thursday</option>
+                                    <option>Friday</option>
+                                    <option>Saturday</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Department</label>
+                                <select id="deptSelect" name="department" class="form-control" required>
+                                    <option value="">-- Select Department --</option>
+                                    <option th:each="dept : ${allDepartments}" th:value="${dept.deptCode}" th:text="${dept.deptName}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Subject</label>
+                                <select id="subjectSelect" name="subject" class="form-control" required>
+                                    <option value="">-- Select Subject --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Faculty</label>
+                                <select id="facultySelect" name="faculty" class="form-control" required>
+                                    <option value="">-- Select Faculty --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" name="startTime" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">End Time</label>
+                                <input type="time" name="endTime" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Room / Hall</label>
+                                <input type="text" name="room" class="form-control" placeholder="e.g. CS-101">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-lime">Save Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    $('#deptSelect').on('change', function () {
+        var deptCode = $(this).val();
+        $('#subjectSelect').html('<option value="">Loading...</option>');
+        $('#facultySelect').html('<option value="">Loading...</option>');
+        if (deptCode) {
+            $.ajax({ url: '/admin/getSubjectsByDept', type: 'GET', data: { deptCode: deptCode },
+                success: function (data) {
+                    var opts = '<option value="">-- Select Subject --</option>';
+                    $.each(data, (i, s) => { opts += `<option value="${s.subjectCode}">${s.subjectName} (${s.subjectCode})</option>`; });
+                    $('#subjectSelect').html(opts);
+                }
+            });
+            $.ajax({ url: '/admin/getFacultyByDept', type: 'GET', data: { deptCode: deptCode },
+                success: function (data) {
+                    var opts = '<option value="">-- Select Faculty --</option>';
+                    $.each(data, (i, f) => { opts += `<option value="${f.id}">${f.fullName} (${f.designation})</option>`; });
+                    $('#facultySelect').html(opts);
+                }
+            });
+        } else {
+            $('#subjectSelect').html('<option value="">-- Select Subject --</option>');
+            $('#facultySelect').html('<option value="">-- Select Faculty --</option>');
+        }
+    });
+
+    $(document).ready(function () {
+        var table = $('#timeTable');
+        var departments = new Set();
+        table.find('tbody tr').each(function () {
+            var dept = $(this).find('td:eq(2)').text().trim();
+            if (dept) departments.add(dept);
+        });
+        departments.forEach(d => $('#deptFilter').append(`<option value="${d}">${d}</option>`));
+
+        $('#deptFilter').on('change', function () {
+            var selected = $(this).val();
+            table.find('tbody tr').each(function () {
+                var rowDept = $(this).find('td:eq(2)').text().trim();
+                $(this).toggle(!selected || rowDept === selected);
+            });
+        });
+    });
+</script>
+</body>
+</html>

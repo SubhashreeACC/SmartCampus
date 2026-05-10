@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SmartCampus AI — Secure Access</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --surface: #12151c;
+            --primary: #c8f135;
+            --primary-glow: rgba(200, 241, 53, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #8a8f98;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Sora', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 70% 30%, rgba(200, 241, 53, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 30% 70%, rgba(200, 241, 53, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--surface);
+            border-radius: 32px;
+            padding: 48px;
+            border: 1px solid var(--border);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-area i {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .logo-area h2 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 16px 16px 48px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .back-link {
+            display: none; /* Replaced by global nav */
+        }
+
+        /* Nav Integration */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 12, 16, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .logo i { color: var(--primary); }
+
+        .nav-links { display: flex; gap: 40px; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { color: var(--primary); }
+
+        .btn-nav {
+            background: var(--primary);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 4px 20px var(--primary-glow); }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .captcha-img {
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<nav>
+    <a href="/index" class="logo">
+        <i class="fas fa-brain"></i>
+        Smart<span>Campus</span>
+    </a>
+    <div class="nav-links">
+        <a href="/index">Home</a>
+        <a href="/studentregister">Register</a>
+    </div>
+    <div class="nav-buttons">
+        <a href="/login" class="btn-nav">Portal Access</a>
+    </div>
+</nav>
+
+<div class="login-card" style="margin-top: 80px;">
+    <div class="logo-area">
+        <i class="fas fa-brain"></i>
+        <h2>Welcome Back</h2>
+        <p>Access your personalized AI learning ecosystem.</p>
+    </div>
+
+    <!-- Error Messages -->
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}">Error Message</span>
+    </div>
+    <div th:if="${param.captchaError}" class="alert alert-error">
+        <i class="fas fa-shield-halved"></i>
+        <span>Invalid CAPTCHA. Please try again.</span>
+    </div>
+
+    <form th:action="@{/loginreq}" method="post">
+        <div class="form-group">
+            <label>Identification</label>
+            <div class="input-wrap">
+                <i class="fas fa-user"></i>
+                <input type="text" name="username" placeholder="Username or Student ID" required>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Security Key</label>
+            <div class="input-wrap">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Human Verification</label>
+            <div class="captcha-container">
+                <img src="/captcha" alt="Captcha" class="captcha-img" id="captchaImg" onclick="this.src='/captcha?'+new Date().getTime()">
+                <div class="input-wrap" style="flex: 1;">
+                    <input type="text" name="captcha" placeholder="Enter Code" required style="padding-left: 15px;">
+                </div>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">Click image to refresh if unreadable.</p>
+        </div>
+
+        <button type="submit" class="btn-submit">Login</button>
+    </form>
+
+    <div class="footer-links">
+        <p>New to SmartCampus?</p>
+        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
+            <a href="/studentregister">Student Register</a>
+            <span style="color: var(--border)">|</span>
+            <!--<a href="/facultyregister">Faculty Register</a>-->
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

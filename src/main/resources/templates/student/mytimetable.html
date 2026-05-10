@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SmartCampus - Dashboard</title>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" href="/css/style.css">
+
+</head>
+
+<body>
+
+	<div th:replace="fragments/sidebar :: sidebar"></div>
+
+	<!-- ══ MAIN ══ -->
+	<main class="main">
+
+		<!-- Topbar -->
+		<div th:replace="fragments/topbar :: topbar"></div>
+
+		<div class="card" style="margin-top:20px;">
+			<div class="card-header">
+				<span class="card-title">📚 My Classes</span>
+			</div>
+
+			<table class="table">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Day</th>
+						<th>Subject</th>
+						<th>Department</th>
+						<th>Time</th>
+						<th>Room</th>
+					</tr>
+				</thead>
+				<tbody>
+
+					<!-- 🔽 Loop through timetableList -->
+					<tr th:each="t, stat : ${timetableList}">
+						<td th:text="${stat.count}">1</td>
+						<td th:text="${t.day}">Monday</td>
+						<td th:text="${t.subjectName}">Data Structures</td>
+						<td th:text="${t.deptName}">CSE</td>
+						<td>
+							<span th:text="${t.startTime}">08:00</span> -
+							<span th:text="${t.endTime}">09:00</span>
+						</td>
+						<td th:text="${t.room}">Room 101</td>
+					</tr>
+
+					<!-- 🔽 If no data -->
+					<tr th:if="${#lists.isEmpty(timetableList)}">
+						<td colspan="6" style="text-align:center;">No classes found</td>
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+
+	</main>
+
+	<script>
+
+	</script>
+</body>
+
+</html>

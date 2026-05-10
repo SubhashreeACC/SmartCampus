@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SmartCampus — Academic Grading</title>
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<link rel="stylesheet" href="/css/style.css">
+
+	<style>
+		:root {
+			--bg: #faf7f2;
+			--surface: #ffffff;
+			--text-primary: #1e1e1e;
+			--text-secondary: #5a5a5a;
+			--lime: #c8f135;
+			--lime-dim: rgba(200, 241, 53, 0.1);
+			--border: rgba(0, 0, 0, 0.06);
+			--shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.06);
+		}
+
+		body {
+			background-color: var(--bg);
+			font-family: 'Sora', sans-serif;
+			color: var(--text-primary);
+		}
+
+		.main { padding: 2rem; }
+
+		.glass-card {
+			background: var(--surface);
+			border-radius: 24px;
+			border: 1px solid var(--border);
+			padding: 32px;
+			box-shadow: var(--shadow);
+			animation: fadeInUp 0.5s ease both;
+		}
+
+		.header-title h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+
+		.form-label-custom {
+			font-size: 11px;
+			font-weight: 700;
+			color: var(--text-secondary);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 8px;
+			display: block;
+		}
+
+		.select-custom {
+			width: 100%;
+			padding: 14px 18px;
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			font-family: inherit;
+			font-size: 14px;
+			background: #fdfcf9;
+			outline: none;
+			transition: 0.3s;
+		}
+
+		.select-custom:focus { border-color: var(--lime); background: #fff; box-shadow: 0 0 0 4px var(--lime-dim); }
+
+		.grade-input {
+			width: 80px;
+			padding: 8px;
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			text-align: center;
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+
+		.grade-input:focus { border-color: var(--lime); outline: none; }
+
+		.btn-save {
+			background: var(--lime);
+			color: #1a1d2e;
+			border: none;
+			padding: 8px 16px;
+			border-radius: 10px;
+			font-weight: 700;
+			font-size: 12px;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+
+		.btn-save:hover { background: #daf55c; transform: translateY(-1px); }
+
+		.table-custom { width: 100%; border-collapse: collapse; margin-top: 24px; }
+		.table-custom th { background: #fdfcf9; padding: 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--border); text-align: left; }
+		.table-custom td { padding: 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+
+		@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+	</style>
+</head>
+
+<body>
+
+	<div th:replace="fragments/sidebar :: sidebar"></div>
+
+	<main class="main">
+		<div th:replace="fragments/topbar :: topbar"></div>
+
+		<div class="content">
+			<div class="header-title mb-4">
+				<h2>Academic Grading</h2>
+				<p style="color:var(--text-secondary);">Submit and manage student performance records by department.</p>
+			</div>
+
+			<div class="glass-card mb-4">
+				<div class="row g-4">
+					<div class="col-md-4">
+						<label class="form-label-custom">Target Department</label>
+						<select class="select-custom" id="deptSelect" onchange="loadStudents()">
+							<option value="">-- Select Department --</option>
+							<option th:each="d : ${allDepartments}" th:value="${d.deptCode}" th:text="${d.deptName}"></option>
+						</select>
+					</div>
+					<div class="col-md-4">
+						<label class="form-label-custom">Subject</label>
+						<select class="select-custom" id="subSelect" onchange="loadStudents()">
+							<option value="">-- Select Subject --</option>
+							<option th:each="s : ${allSubjects}" th:value="${s.subjectCode}" th:text="${s.subjectName}"></option>
+						</select>
+					</div>
+					<div class="col-md-2">
+						<label class="form-label-custom">Semester</label>
+						<select class="select-custom" id="semSelect" onchange="loadStudents()">
+							<option value="1">Sem 1</option>
+							<option value="2">Sem 2</option>
+							<option value="3">Sem 3</option>
+							<option value="4">Sem 4</option>
+							<option value="5">Sem 5</option>
+							<option value="6">Sem 6</option>
+							<option value="7">Sem 7</option>
+							<option value="8">Sem 8</option>
+						</select>
+					</div>
+					<div class="col-md-2">
+						<label class="form-label-custom">Year</label>
+						<input type="text" class="select-custom" id="yearInput" value="2025-26" onchange="loadStudents()" />
+					</div>
+				</div>
+			</div>
+
+			<div class="glass-card" id="studentListCard" style="display:none;">
+				<div class="table-wrap">
+					<table class="table-custom" id="studentTable">
+						<thead>
+							<tr>
+								<th>Student ID</th>
+								<th>Student Name</th>
+								<th>Email</th>
+								<th>Grade (O-F)</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody id="studentBody"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		async function loadStudents() {
+			const dept = document.getElementById('deptSelect').value;
+			const sub = document.getElementById('subSelect').value;
+			const sem = document.getElementById('semSelect').value;
+			const year = document.getElementById('yearInput').value;
+
+			if (!dept || !sub) {
+				document.getElementById('studentListCard').style.display = 'none';
+				return;
+			}
+
+			try {
+				const res = await fetch(`/faculty/get-students-by-dept?deptCode=${dept}&subjectCode=${sub}&semester=${sem}&academicYear=${year}`);
+				const students = await res.json();
+				
+				const tbody = document.getElementById('studentBody');
+				tbody.innerHTML = students.map(s => `
+					<tr id="row-${s.studentid}">
+						<td style="font-weight:700;">${s.studentid}</td>
+						<td>${s.fullname}</td>
+						<td style="color:var(--text-secondary); font-size:12px;">${s.email}</td>
+						<td>
+							<input type="text" class="grade-input" id="grade-${s.studentid}" placeholder="A+" />
+						</td>
+						<td>
+							<button class="btn-save" onclick="saveIndividualGrade('${s.studentid}')">Save</button>
+						</td>
+					</tr>
+				`).join('');
+				
+				document.getElementById('studentListCard').style.display = 'block';
+			} catch (e) { console.error(e); }
+		}
+
+		async function saveIndividualGrade(sid) {
+			const sub = document.getElementById('subSelect').value;
+			if (!sub) { alert('Please select a subject first.'); return; }
+
+			const grade = document.getElementById(`grade-${sid}`).value.trim();
+			if (!grade) { alert('Please enter a grade.'); return; }
+
+			const sem = document.getElementById('semSelect').value;
+			const year = document.getElementById('yearInput').value;
+
+			const data = {
+				studentId: sid,
+				subjectCode: sub,
+				grade: grade,
+				semester: parseInt(sem),
+				academicYear: year
+			};
+
+			try {
+				const res = await fetch('/faculty/save-grade', {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(data)
+				});
+				const resData = await res.json();
+				if (resData.success) {
+					const btn = document.querySelector(`#row-${sid} .btn-save`);
+					btn.innerHTML = '<i class="fas fa-check"></i> Saved';
+					btn.style.background = '#eaf3de';
+					btn.style.color = '#2d7a4f';
+					setTimeout(() => {
+						btn.innerHTML = 'Save';
+						btn.style.background = 'var(--lime)';
+						btn.style.color = '#1a1d2e';
+					}, 2000);
+				} else {
+					alert("Failed to save grade: " + resData.message);
+				}
+			} catch (e) { 
+				console.error(e); 
+				alert("Error connecting to server. Please try again.");
+			}
+		}
+	</script>
+</body>
+</html>

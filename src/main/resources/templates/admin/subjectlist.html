@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCampus — Subject Master</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .page-card { background: var(--card-bg); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); }
+        .page-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title-row h2 { font-size: 22px; font-weight: 700; color: var(--text-dark); }
+        .filter-bar { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: var(--radius-sm); }
+        .filter-bar label { font-size: 12px; font-weight: 600; color: var(--text-mid); margin: 0 8px 0 0; }
+        .filter-select { border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; background: var(--card-bg); color: var(--text-dark); outline: none; }
+        .filter-select:focus { border-color: var(--primary); }
+        .btn-lime { background: var(--primary); color: #1a2e24; font-weight: 700; border: none; padding: 10px 22px; border-radius: var(--radius-sm); transition: .2s; cursor: pointer; }
+        .btn-lime:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table thead th { background: var(--primary-pale); color: var(--text-dark); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 12px 16px; border-bottom: 2px solid var(--primary); }
+        .data-table tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+        .data-table tbody tr:hover { background: var(--primary-pale); }
+        .data-table tbody td { padding: 12px 16px; font-size: 13.5px; color: var(--text-dark); vertical-align: middle; }
+        .badge-code { background: var(--primary-pale); color: var(--primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+        .badge-dept { background: #dbeeff; color: var(--accent-blue); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+        .btn-edit { background: #dbeeff; color: var(--accent-blue); border: none; padding: 5px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; }
+        .btn-edit:hover { background: var(--accent-blue); color: #fff; }
+        .btn-del { background: #fde8df; color: var(--accent-orange); border: none; padding: 5px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; text-decoration: none; }
+        .btn-del:hover { background: var(--accent-orange); color: #fff; }
+        .modal-content { border-radius: var(--radius); border: 1px solid var(--border); }
+        .modal-header { background: var(--primary-pale); border-bottom: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; }
+        .modal-title { font-weight: 700; color: var(--text-dark); }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--text-mid); }
+        .form-control { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(200,241,53,.2); }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/sidebar :: sidebar"></div>
+<main class="main">
+    <div th:replace="fragments/topbar :: topbar"></div>
+
+    <div class="page-card">
+        <div class="page-title-row">
+            <h2><i class="fas fa-book-open" style="color:var(--primary);margin-right:10px"></i>Subject Master</h2>
+            <button class="btn-lime" data-bs-toggle="modal" data-bs-target="#subModal" onclick="openAddModal()">
+                <i class="fas fa-plus"></i> Add Subject
+            </button>
+        </div>
+
+        <div class="filter-bar">
+            <label><i class="fas fa-filter"></i> Filter by Department:</label>
+            <select id="filterDept" class="filter-select">
+                <option value="">All Departments</option>
+                <option th:each="dept : ${allDepartments}" th:value="${dept.deptCode}" th:text="${dept.deptName}"></option>
+            </select>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table" id="subjectTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Department</th>
+                        <th>Subject Name</th>
+                        <th>Code</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="sub,stat:${allSubjects}" th:attr="data-dept=${sub.deptCode}">
+                        <td style="color:var(--text-light);font-weight:600" th:text="${stat.index+1}"></td>
+                        <td><span class="badge-dept" th:text="${sub.deptName}"></span></td>
+                        <td style="font-weight:600" th:text="${sub.subjectName}"></td>
+                        <td><span class="badge-code" th:text="${sub.subjectCode}"></span></td>
+                        <td>
+                            <button class="btn-edit me-2" th:attr="data-id=${sub.subId},data-name=${sub.subjectName}" onclick="openEditModal(this)">
+                                <i class="fas fa-pen"></i> Edit
+                            </button>
+                            <a class="btn-del" th:href="@{/admin/deleteSubject/{id}(id=${sub.subId})}" onclick="return confirm('Delete this subject?')">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Subject Modal -->
+    <div class="modal fade" id="subModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Subject</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="subForm" th:action="@{/admin/savesubject}" method="post">
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="subId" id="subId">
+                        <div class="mb-3">
+                            <label class="form-label">Subject Name</label>
+                            <input type="text" name="subjectName" id="subjectName" class="form-control" placeholder="e.g. Data Structures" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Department</label>
+                            <select name="deptCode" class="form-control" required>
+                                <option value="">-- Select Department --</option>
+                                <option th:each="dept : ${allDepartments}" th:value="${dept.deptCode}" th:text="${dept.deptName}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-lime">Save Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Subject Modal -->
+    <div class="modal fade" id="editSubjectModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Subject</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/updateSubject}" method="post">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="editSubjectId" name="subId">
+                        <div class="mb-3">
+                            <label class="form-label">Subject Name</label>
+                            <input type="text" class="form-control" id="editSubjectName" name="subjectName" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-lime">Update Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    function openAddModal() {
+        $('#modalTitle').text("Add Subject");
+        $('#subForm').attr("action", "/admin/savesubject");
+        $('#subId').val(""); $('#subjectName').val("");
+    }
+    function openEditModal(btn) {
+        document.getElementById('editSubjectId').value = btn.getAttribute('data-id');
+        document.getElementById('editSubjectName').value = btn.getAttribute('data-name');
+        new bootstrap.Modal(document.getElementById('editSubjectModal')).show();
+    }
+    $('#filterDept').on('change', function () {
+        let selected = $(this).val();
+        $('#subjectTable tbody tr').each(function () {
+            $(this).toggle(selected === "" || $(this).data('dept') === selected);
+        });
+    });
+</script>
+</body>
+</html>

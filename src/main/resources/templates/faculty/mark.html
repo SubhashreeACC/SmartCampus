@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SmartCampus — Register Attendance</title>
+	<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	
+	<style>
+		:root {
+			--bg: #faf7f2;
+			--surface: #ffffff;
+			--text-primary: #1e1e1e;
+			--text-secondary: #5a5a5a;
+			--lime: #c8f135;
+			--lime-dim: rgba(200, 241, 53, 0.15);
+			--border: rgba(0, 0, 0, 0.06);
+			--shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.1);
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'Sora', sans-serif;
+			background-color: var(--bg);
+			color: var(--text-primary);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 100vh;
+			padding: 20px;
+		}
+
+		/* Background Noise Texture */
+		body::before {
+			content: '';
+			position: fixed;
+			inset: 0;
+			background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+			pointer-events: none;
+			opacity: 0.3;
+			z-index: -1;
+		}
+
+		.card {
+			background: var(--surface);
+			padding: 40px 32px;
+			border-radius: 32px;
+			width: 100%;
+			max-width: 400px;
+			border: 1px solid var(--border);
+			box-shadow: var(--shadow);
+			text-align: center;
+			animation: fadeInUp 0.6s ease both;
+		}
+
+		.logo-icon {
+			width: 64px;
+			height: 64px;
+			background: var(--lime);
+			border-radius: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 24px;
+			margin: 0 auto 24px;
+			box-shadow: 0 8px 16px -4px rgba(200, 241, 53, 0.4);
+		}
+
+		h2 {
+			font-size: 26px;
+			font-weight: 800;
+			letter-spacing: -0.02em;
+			margin-bottom: 8px;
+		}
+
+		.session-pill {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			background: var(--lime-dim);
+			color: #1a1d2e;
+			font-size: 11px;
+			font-weight: 700;
+			padding: 6px 14px;
+			border-radius: 40px;
+			margin-bottom: 32px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			border: 1px solid rgba(200, 241, 53, 0.2);
+		}
+
+		.input-group {
+			text-align: left;
+			margin-bottom: 20px;
+		}
+
+		label {
+			font-size: 11px;
+			font-weight: 700;
+			color: var(--text-secondary);
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 8px;
+			display: block;
+			margin-left: 4px;
+		}
+
+		input {
+			width: 100%;
+			padding: 14px 18px;
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			font-family: inherit;
+			font-size: 15px;
+			background: #fdfcf9;
+			outline: none;
+			transition: all 0.3s;
+		}
+
+		input:focus {
+			border-color: var(--lime);
+			box-shadow: 0 0 0 4px var(--lime-dim);
+			background: #fff;
+		}
+
+		button {
+			width: 100%;
+			padding: 16px;
+			background: var(--lime);
+			color: #1a1d2e;
+			border: none;
+			border-radius: 16px;
+			font-size: 16px;
+			font-weight: 700;
+			cursor: pointer;
+			transition: all 0.3s;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			margin-top: 10px;
+		}
+
+		button:hover {
+			background: #daf55c;
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px -6px rgba(200, 241, 53, 0.4);
+		}
+
+		button:disabled {
+			background: #f0ede7;
+			color: #a0a0a0;
+			cursor: not-allowed;
+			transform: none;
+			box-shadow: none;
+		}
+
+		.msg {
+			margin-top: 24px;
+			font-size: 14px;
+			font-weight: 500;
+			min-height: 20px;
+		}
+
+		.success { color: #2d7a4f; background: #eaf3de; padding: 12px; border-radius: 12px; }
+		.error { color: #a32d2d; background: #fcebeb; padding: 12px; border-radius: 12px; }
+
+		.footer-text {
+			margin-top: 32px;
+			font-size: 12px;
+			color: var(--text-secondary);
+		}
+
+		@keyframes fadeInUp {
+			from { opacity: 0; transform: translateY(20px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		.spinner {
+			width: 20px;
+			height: 20px;
+			border: 3px solid rgba(0,0,0,0.1);
+			border-top-color: #000;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+		}
+
+		@keyframes spin { to { transform: rotate(360deg); } }
+	</style>
+</head>
+
+<body>
+
+	<div class="card">
+		<div class="logo-icon">⚡</div>
+		<h2>Sign-in to Class</h2>
+		<p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">Welcome to SmartCampus Pulse</p>
+		
+		<div id="sessionPill" class="session-pill">
+			<i class="fas fa-satellite-dish"></i> Session: Checking...
+		</div>
+
+		<div class="input-group">
+			<label>Student ID / Reg No</label>
+			<input type="text" id="regNo" placeholder="e.g. 21CS045" autofocus>
+		</div>
+
+		<div class="input-group">
+			<label>Full Name</label>
+			<input type="text" id="name" placeholder="Auto-fills on ID entry" readonly>
+		</div>
+
+		<button onclick="markAttendance()" id="btn">
+			Confirm Presence <i class="fas fa-check-circle"></i>
+		</button>
+
+		<div id="msg" class="msg"></div>
+
+		<div class="footer-text">
+			<i class="fas fa-lock"></i> Secured by SmartCampus AI
+		</div>
+	</div>
+
+	<script>
+		const BASE_URL = window.location.origin + "/attendance";
+		const params = new URLSearchParams(window.location.search);
+		const sessionId = params.get("sessionId");
+
+		document.getElementById("sessionPill").innerHTML =
+			sessionId ? `<i class="fas fa-satellite-dish"></i> Session: ${sessionId}` : `<i class="fas fa-exclamation-triangle"></i> Invalid Session`;
+
+		if (!sessionId) {
+			document.getElementById("btn").disabled = true;
+			document.getElementById("regNo").disabled = true;
+		}
+
+		async function markAttendance() {
+			const regNo = document.getElementById("regNo").value.trim();
+			const name = document.getElementById("name").value.trim();
+			const msg = document.getElementById("msg");
+			const btn = document.getElementById("btn");
+
+			if (!regNo || !name) {
+				msg.innerHTML = "<div class='error'>Please enter a valid Student ID</div>";
+				return;
+			}
+
+			btn.disabled = true;
+			btn.innerHTML = "<div class='spinner'></div> Registering...";
+			msg.innerHTML = "";
+
+			let lat = null, lng = null;
+
+			// Get location
+			if (navigator.geolocation) {
+				try {
+					const pos = await new Promise((res, rej) =>
+						navigator.geolocation.getCurrentPosition(res, rej, {timeout: 5000})
+					);
+					lat = pos.coords.latitude;
+					lng = pos.coords.longitude;
+				} catch (e) { console.warn("Location access denied or timeout"); }
+			}
+
+			try {
+				const res = await fetch(`${BASE_URL}/mark`, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify({
+						regNo,
+						name,
+						latitude: lat,
+						longitude: lng,
+						method: "QR Scan",
+						sessionId
+					})
+				});
+
+				const data = await res.json();
+
+				if (data.success) {
+					msg.innerHTML = "<div class='success'><i class='fas fa-check-circle'></i> Attendance Registered successfully!</div>";
+					document.getElementById("regNo").value = "";
+					document.getElementById("name").value = "";
+					btn.innerHTML = "Done <i class='fas fa-check'></i>";
+				} else {
+					msg.innerHTML = "<div class='error'><i class='fas fa-info-circle'></i> " + data.message + "</div>";
+					btn.disabled = false;
+					btn.innerHTML = "Confirm Presence <i class='fas fa-check-circle'></i>";
+				}
+
+			} catch (err) {
+				msg.innerHTML = "<div class='error'>Connection Error. Please try again.</div>";
+				btn.disabled = false;
+				btn.innerHTML = "Confirm Presence <i class='fas fa-check-circle'></i>";
+			}
+		}
+
+		document.getElementById("regNo").addEventListener("input", async function () {
+			const regNo = this.value.trim();
+			if (regNo.length < 3) return;
+
+			try {
+				const res = await fetch(`${BASE_URL}/student/${regNo}`);
+				const data = await res.json();
+				if (data.success) {
+					document.getElementById("name").value = data.name;
+				} else {
+					document.getElementById("name").value = "";
+				}
+			} catch (e) {}
+		});
+	</script>
+
+</body>
+</html>
